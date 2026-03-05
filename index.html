@@ -3,139 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة منهل LMS | الإدارة السحابية</title>
+    <title>منصة منهل LMS - نظام الإدارة الموحد</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --success: #27ae60;
-            --bg: #f4f7f6;
-            --white: #ffffff;
+            --primary: #1e272e;
+            --accent: #0fbcf9;
+            --success: #05c46b;
+            --bg: #f1f2f6;
+            --shimmer: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
         }
 
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            display: flex;
-            min-height: 100vh;
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; overflow-x: hidden; }
+
+        /* شاشة الدخول */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); z-index: 10000; display: flex;
+            align-items: center; justify-content: center; color: white;
         }
 
-        /* تأثير الشيمر (Shimmer Effect) */
-        .btn-shimmer {
-            position: relative;
-            overflow: hidden;
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .btn-shimmer::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer { 100% { left: 100%; } }
-
-        /* Sidebar القائمة الجانبية */
-        .sidebar {
-            width: 260px;
-            background: var(--primary);
-            color: white;
-            position: fixed;
-            height: 100%;
-            right: 0;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-        }
-        .nav-item {
-            padding: 15px 25px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: 0.3s;
-        }
-        .nav-item:hover, .nav-item.active {
-            background: rgba(255,255,255,0.1);
-            border-right: 4px solid var(--accent);
+        .login-card {
+            background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px;
+            backdrop-filter: blur(10px); width: 350px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Content المحتوى */
-        .main-content {
-            margin-right: 260px;
-            width: calc(100% - 260px);
-            padding: 40px;
+        /* تأثير الشيمر للأزرار */
+        .shimmer-btn {
+            position: relative; overflow: hidden; background: var(--accent);
+            color: white; border: none; padding: 12px 30px; border-radius: 10px;
+            cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px;
         }
-        .card {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
+        .shimmer-btn::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: var(--shimmer); animation: shim 2.5s infinite;
         }
+        @keyframes shim { 100% { left: 100%; } }
 
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
+        /* واجهة النظام */
+        #main-system { display: none; }
+        .sidebar { width: 260px; background: var(--primary); color: white; height: 100vh; position: fixed; right: 0; }
+        .content { margin-right: 260px; padding: 40px; }
+        
+        .nav-item { padding: 15px 25px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 15px; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); border-right: 4px solid var(--accent); }
+
+        .card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div style="padding:30px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1);">
-            <i class="fas fa-graduation-cap fa-3x"></i>
-            <h2>منهل LMS</h2>
+    <div id="login-overlay">
+        <div class="login-card">
+            <i class="fas fa-university fa-4x" style="color: var(--accent);"></i>
+            <h2>مرحباً بك في مـنـهـل</h2>
+            <p>اختر نوع الدخول</p>
+            <select id="userRole" onchange="toggleLoginFields()" style="padding: 10px; width: 100%; border-radius: 8px;">
+                <option value="student">طالب (برقم القيد)</option>
+                <option value="admin">مسؤول / معلم</option>
+            </select>
+            <input type="text" id="loginID" placeholder="أدخل الرقم التسلسلي">
+            <input type="password" id="loginPass" placeholder="كلمة المرور" style="display:none;">
+            <button class="shimmer-btn" onclick="handleLogin()">دخول للنظام</button>
         </div>
-        <div class="nav-item active" onclick="showPage('dash')"><i class="fas fa-chart-line"></i> لوحة التحكم</div>
-        <div class="nav-item" onclick="showPage('students')"><i class="fas fa-user-plus"></i> إضافة طلاب</div>
-        <div class="nav-item" onclick="showPage('view')"><i class="fas fa-users"></i> عرض الطلاب</div>
     </div>
 
-    <div class="main-content">
-        <div id="dash" class="page">
-            <div class="card">
-                <h1>أهلاً بك في نظام منهل السحابي</h1>
-                <p>النظام مرتبط الآن بقاعدة بيانات Google Cloud في قطر.</p>
+    <div id="main-system">
+        <div class="sidebar">
+            <div style="padding: 30px; text-align: center;"><h3>منصة منهل</h3></div>
+            <div class="nav-item active" onclick="showTab('dash')"><i class="fas fa-home"></i> الرئيسية</div>
+            <div id="admin-only-nav" style="display:none;">
+                <div class="nav-item" onclick="showTab('add')"><i class="fas fa-user-plus"></i> تسجيل الطلاب</div>
+                <div class="nav-item" onclick="showTab('stats')"><i class="fas fa-chart-pie"></i> تقارير النظام</div>
             </div>
+            <div class="nav-item" onclick="location.reload()"><i class="fas fa-sign-out-alt"></i> خروج</div>
         </div>
 
-        <div id="students" class="page" style="display:none;">
-            <div class="card">
-                <h3>تسجيل طالب جديد في السحابة</h3>
-                <input type="text" id="sName" placeholder="اسم الطالب الكامل">
-                <input type="text" id="sID" placeholder="الرقم التسلسلي (ID)">
-                <button class="btn-shimmer" onclick="saveToFirebase()">حفظ في Firebase</button>
+        <div class="content">
+            <div id="dash-tab" class="tab">
+                <div class="card">
+                    <h1 id="welcomeMsg">أهلاً بك</h1>
+                    <p>هنا يمكنك متابعة الحصص، الدرجات، والمهام اليومية.</p>
+                </div>
             </div>
-        </div>
 
-        <div id="view" class="page" style="display:none;">
-            <div class="card">
-                <h3>قائمة الطلاب من السحابة</h3>
-                <div id="studentList">جاري تحميل البيانات...</div>
+            <div id="add-tab" class="tab" style="display:none;">
+                <div class="card">
+                    <h3>إضافة طالب جديد للقاعدة السحابية</h3>
+                    <input type="text" id="newSName" placeholder="اسم الطالب">
+                    <input type="text" id="newSID" placeholder="الرقم التسلسلي">
+                    <button class="shimmer-btn" onclick="pushToCloud()">حفظ في قطر (me-central1)</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // إعداداتك الخاصة التي زودتني بها
         const firebaseConfig = {
           apiKey: "AIzaSyDZSaUw0nBzvZUlXEhWOAqAMXEadcP0aUc",
           authDomain: "manhal-lms.firebaseapp.com",
@@ -149,45 +121,49 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // وظيفة الحفظ في Firestore
-        window.saveToFirebase = async () => {
-            const name = document.getElementById('sName').value;
-            const serial = document.getElementById('sID').value;
+        // وظائف الواجهة
+        window.toggleLoginFields = () => {
+            const role = document.getElementById('userRole').value;
+            document.getElementById('loginPass').style.display = (role === 'admin') ? 'block' : 'none';
+        }
 
-            if(!name || !serial) return alert("يرجى ملء كافة الحقول");
+        window.handleLogin = async () => {
+            const role = document.getElementById('userRole').value;
+            const id = document.getElementById('loginID').value;
+            const pass = document.getElementById('loginPass').value;
 
-            try {
-                await addDoc(collection(db, "students"), {
-                    name: name,
-                    serial: serial,
-                    createdAt: new Date()
-                });
-                alert("تم الحفظ بنجاح في سحابة قطر!");
-                document.getElementById('sName').value = "";
-                document.getElementById('sID').value = "";
-                loadStudents();
-            } catch (e) {
-                alert("خطأ: " + e.message);
+            if (role === 'admin') {
+                if (pass === "admin123") { // كلمة سر افتراضية للتجربة
+                    openSystem("المسؤول", true);
+                } else { alert("كلمة المرور خاطئة"); }
+            } else {
+                // البحث عن الطالب في السحابة
+                const q = query(collection(db, "students"), where("serial", "==", id));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    const studentData = snap.docs[0].data();
+                    openSystem(studentData.name, false);
+                } else { alert("عذراً، الرقم التسلسلي غير مسجل لدينا"); }
             }
-        };
+        }
 
-        // وظيفة جلب البيانات
-        window.loadStudents = async () => {
-            const querySnapshot = await getDocs(collection(db, "students"));
-            const listDiv = document.getElementById('studentList');
-            listDiv.innerHTML = "";
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                listDiv.innerHTML += `<div class="card" style="margin:5px; border-right:4px solid var(--accent)">
-                    <strong>${data.name}</strong> - الرقم: ${data.serial}
-                </div>`;
-            });
-        };
+        function openSystem(name, isAdmin) {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-system').style.display = 'block';
+            document.getElementById('welcomeMsg').innerText = "مرحباً، " + name;
+            if (isAdmin) document.getElementById('admin-only-nav').style.display = 'block';
+        }
 
-        window.showPage = (id) => {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-            document.getElementById(id).style.display = 'block';
-            if(id === 'view') loadStudents();
+        window.pushToCloud = async () => {
+            const name = document.getElementById('newSName').value;
+            const id = document.getElementById('newSID').value;
+            await addDoc(collection(db, "students"), { name, serial: id });
+            alert("تم تسجيل الطالب بنجاح!");
+        }
+
+        window.showTab = (tab) => {
+            document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
+            document.getElementById(tab + '-tab').style.display = 'block';
         }
     </script>
 </body>
