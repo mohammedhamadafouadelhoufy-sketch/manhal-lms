@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة منهل التعليمية | LMS 2026</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #1a2a3a;
+            --accent-color: #00d2ff;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --bg-light: #f8f9fa;
+            --shimmer-grad: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-light);
+            min-height: 100vh;
+        }
+
+        /* تأثير الشيمر (Shimmer) */
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: var(--shimmer-grad);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 100% { left: 100%; } }
+
+        /* القائمة الجانبية */
+        .sidebar {
+            width: 260px;
+            background: var(--primary-color);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            right: 0;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar-header {
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-menu { padding: 20px 0; }
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: var(--accent-color);
+            border-right: 4px solid var(--accent-color);
+        }
+
+        /* منطقة المحتوى */
+        .main-content {
+            margin-right: 260px;
+            padding: 40px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        /* الجداول */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        th { background: #f4f7f6; color: var(--primary-color); }
+        .break-row { background-color: #fff9c4 !important; }
+
+        /* البحث والإدخال */
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        input, select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .page { display: none; }
+        .page-active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>مـنـهـل LMS</h2>
+            <small>نظام إدارة التعلم 2026</small>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="openPage('home', this)">📊 الرئيسية</div>
+            <div class="nav-item" onclick="openPage('classes', this)">🏫 إدارة الصفوف</div>
+            <div class="nav-item" onclick="openPage('schedule', this)">📅 الجداول الدراسية</div>
+            <div class="nav-item" onclick="openPage('exams', this)">📝 مركز الاختبارات</div>
+            <div class="nav-item" onclick="openPage('admin', this)">⚙️ الإدارة والتصدير</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="home" class="page page-active">
+            <div class="card">
+                <h1>لوحة تحكم منهل</h1>
+                <div class="input-group">
+                    <div class="card" style="background: var(--primary-color); color: white;">
+                        <h4>الطلاب المسجلين</h4>
+                        <h2 id="total-s">0</h2>
+                    </div>
+                    <div class="card" style="background: var(--accent-color); color: white;">
+                        <h4>إجمالي الصفوف</h4>
+                        <h2 id="total-c">0</h2>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🔍 البحث السريع (نطاق الطالب)</h3>
+                <input type="text" id="globalSearch" onkeyup="doSearch()" placeholder="ابحث بالاسم أو الرقم التسلسلي...">
+                <div id="searchRes" style="margin-top:15px;"></div>
+            </div>
+        </div>
+
+        <div id="classes" class="page">
+            <div class="card">
+                <h3>إضافة صف ومسار جديد</h3>
+                <div class="input-group">
+                    <input id="inCName" placeholder="اسم الصف">
+                    <input id="inCSec" placeholder="الشعبة">
+                    <select id="inCTrack">
+                        <option>عام</option>
+                        <option>متقدم</option>
+                        <option>نخبة</option>
+                    </select>
+                </div>
+                <button class="btn-shimmer" onclick="addClass()">حفظ الصف</button>
+            </div>
+            <div class="card">
+                <table id="classTable">
+                    <thead><tr><th>الصف</th><th>الشعبة</th><th>المسار</th><th>حذف</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="schedule" class="page">
+            <div class="card">
+                <h3>تنظيم الجدول المدرسي</h3>
+                <div class="input-group">
+                    <select id="schDay"><option>الأحد</option><option>الإثنين</option><option>الثلاثاء</option></select>
+                    <input id="schSub" placeholder="المادة">
+                    <input id="schTch" placeholder="المعلم">
+                    <input id="schTime" type="time">
+                </div>
+                <label><input type="checkbox" id="isBreak"> تسجيل كاستراحة</label>
+                <br><br>
+                <button class="btn-shimmer" onclick="addSch()">إضافة للجدول</button>
+            </div>
+            <div class="card">
+                <table id="schTable">
+                    <thead><tr><th>اليوم</th><th>المادة</th><th>المعلم</th><th>الوقت</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="exams" class="page">
+            <div class="card">
+                <h3>بوابة الاختبارات الرقمية</h3>
+                <input id="formLink" placeholder="أدخل رابط Google Form للاختبار" style="width:70%;">
+                <button class="btn-shimmer" onclick="loadExam()">عرض الاختبار</button>
+                <div id="examContainer" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <div id="admin" class="page">
+            <div class="card">
+                <h3>تصدير البيانات والتقارير</h3>
+                <p>قم بتنزيل كافة بيانات الطلاب والصفوف بصيغ احترافية:</p>
+                <button class="btn-shimmer" onclick="exportExcel()" style="background:#27ae60">تنزيل Excel</button>
+                <button class="btn-shimmer" onclick="window.print()" style="background:#2980b9">طباعة تقرير PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // قاعدة البيانات المحلية
+        let db = JSON.parse(localStorage.getItem('MANHAL_LMS_DB')) || {
+            classes: [],
+            schedule: [],
+            students: [
+                {id: "202601", name: "أحمد منصور", class: "10", track: "عام"},
+                {id: "202602", name: "نورة علي", class: "11", track: "متقدم"}
+            ]
+        };
+
+        function save() {
+            localStorage.setItem('MANHAL_LMS_DB', JSON.stringify(db));
+            renderAll();
+        }
+
+        function openPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('page-active'));
+            document.getElementById(id).classList.add('page-active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function addClass() {
+            db.classes.push({
+                name: document.getElementById('inCName').value,
+                sec: document.getElementById('inCSec').value,
+                track: document.getElementById('inCTrack').value
+            });
+            save();
+        }
+
+        function renderAll() {
+            // رندر الصفوف
+            const cBody = document.querySelector('#classTable tbody');
+            cBody.innerHTML = db.classes.map((c, i) => `
+                <tr><td>${c.name}</td><td>${c.sec}</td><td>${c.track}</td>
+                <td><button onclick="del('classes', ${i})">❌</button></td></tr>
+            `).join('');
+
+            // رندر الإحصائيات
+            document.getElementById('total-s').innerText = db.students.length;
+            document.getElementById('total-c').innerText = db.classes.length;
+        }
+
+        function doSearch() {
+            const q = document.getElementById('globalSearch').value.toLowerCase();
+            const res = db.students.filter(s => s.name.includes(q) || s.id.includes(q));
+            document.getElementById('searchRes').innerHTML = res.map(r => `
+                <div class="card" style="border-right: 5px solid var(--accent-color)">
+                    ${r.name} - الرقم: ${r.id} - المسار: ${r.track}
+                </div>
+            `).join('');
+        }
+
+        function loadExam() {
+            const url = document.getElementById('formLink').value;
+            document.getElementById('examContainer').innerHTML = `<iframe src="${url}" width="100%" height="600px"></iframe>`;
+        }
+
+        function exportExcel() {
+            const ws = XLSX.utils.json_to_sheet(db.students);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Students");
+            XLSX.writeFile(wb, "Manhal_Report_2026.xlsx");
+        }
+
+        function del(key, i) { db[key].splice(i, 1); save(); }
+
+        window.onload = renderAll;
+    </script>
+</body>
+</html>
