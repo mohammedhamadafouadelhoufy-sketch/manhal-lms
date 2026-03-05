@@ -1,250 +1,63 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة منهل LMS | نظام رصد الدرجات السحابي</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<div id="announcements-tab" class="tab-content" style="display:none;">
+    <div class="card" style="background: linear-gradient(45deg, #1e272e, #2f3640); color:white;">
+        <h3><i class="fas fa-bullhorn"></i> الإعلانات العامة للمدرسة</h3>
+        <div id="announcement-list">جاري تحميل التنبيهات...</div>
+    </div>
+</div>
 
-    <style>
-        :root {
-            --primary: #1e272e;
-            --accent: #0fbcf9;
-            --success: #05c46b;
-            --danger: #ff3f34;
-            --bg: #f1f2f6;
-            --shimmer: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        }
+<div id="gamification-view" class="card" style="border-right: 5px solid #f1c40f;">
+    <h3><i class="fas fa-trophy" style="color:#f1c40f"></i> مركز التميز (نقاطي: <span id="userPoints">0</span>)</h3>
+    <div class="shimmer-btn" style="background:#27ae60; display:inline-block; padding:5px 15px;">وسام الطالب المثالي 🏅</div>
+</div>
 
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-
-        /* شاشة الدخول الاحترافية */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, var(--primary), #2f3640);
-            z-index: 10000; display: flex; align-items: center; justify-content: center; color: white;
-        }
-        .login-card {
-            background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 20px;
-            backdrop-filter: blur(15px); width: 380px; text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-
-        /* تأثير الشيمر للأزرار */
-        .shimmer-btn {
-            position: relative; overflow: hidden; background: var(--accent);
-            color: white; border: none; padding: 12px 30px; border-radius: 10px;
-            cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; font-size: 16px;
-        }
-        .shimmer-btn::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: var(--shimmer); animation: shim 2.5s infinite;
-        }
-        @keyframes shim { 100% { left: 100%; } }
-
-        /* الهيكل العام */
-        #main-system { display: none; width: 100%; display: flex; }
-        .sidebar { width: 280px; background: var(--primary); color: white; height: 100vh; position: relative; }
-        .main-panel { flex: 1; overflow-y: auto; padding: 40px; }
-        
-        .nav-item { padding: 18px 25px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 15px; font-size: 15px; }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); border-right: 5px solid var(--accent); color: var(--accent); }
-
-        .card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; }
-        
-        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; font-family: 'Cairo'; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #f8f9fa; padding: 15px; text-align: center; border-bottom: 2px solid #eee; }
-        td { padding: 15px; text-align: center; border-bottom: 1px solid #eee; }
-    </style>
-</head>
-<body>
-
-    <div id="login-overlay">
-        <div class="login-card">
-            <i class="fas fa-user-graduate fa-4x" style="color: var(--accent); margin-bottom: 20px;"></i>
-            <h2 style="margin-bottom: 10px;">منصة مـنـهـل LMS</h2>
-            <p style="color: #dcdde1; font-size: 14px;">نظام الإدارة المدرسية الموحد</p>
-            
-            <select id="userRole" onchange="toggleFields()">
-                <option value="student">دخول الطالب (الرقم التسلسلي)</option>
-                <option value="admin">دخول المعلم / الإدارة</option>
-            </select>
-            
-            <input type="text" id="loginID" placeholder="أدخل الرقم التسلسلي أو اسم المستخدم">
-            <input type="password" id="loginPass" placeholder="كلمة المرور" style="display:none;">
-            
-            <button class="shimmer-btn" onclick="handleLogin()">دخول للنظام</button>
+<div id="live-tab" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3><i class="fas fa-video"></i> الفصول الافتراضية الذكية</h3>
+        <div class="grid-3">
+            <button class="shimmer-btn" onclick="joinMeeting('teams')">انضم عبر MS Teams</button>
+            <button class="shimmer-btn" style="background:#5d3fd3" onclick="joinMeeting('bbb')">دخول BigBlueButton</button>
         </div>
     </div>
+</div>
 
-    <div id="main-system" style="display: none;">
-        <div class="sidebar">
-            <div style="padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <h3 style="margin:0; color:var(--accent);">مـنـهـل 2026</h3>
-            </div>
-            
-            <div class="nav-item active" onclick="showTab('dash')"><i class="fas fa-home"></i> الرئيسية</div>
-            
-            <div id="admin-tools" style="display:none;">
-                <div class="nav-item" onclick="showTab('add-student')"><i class="fas fa-user-plus"></i> تسجيل طالب جديد</div>
-                <div class="nav-item" onclick="showTab('add-grade')"><i class="fas fa-edit"></i> رصد الدرجات</div>
-            </div>
-
-            <div class="nav-item" style="color:var(--danger); margin-top: auto;" onclick="location.reload()">
-                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-            </div>
-        </div>
-
-        <div class="main-panel">
-            <div id="dash-tab" class="tab-content">
-                <div class="card">
-                    <h1 id="welcomeUser">مرحباً بك</h1>
-                    <p>إليك آخر التحديثات والنتائج الأكاديمية الخاصة بك.</p>
-                </div>
-
-                <div id="student-view" style="display:none;">
-                    <div class="card">
-                        <h3><i class="fas fa-poll-h" style="color:var(--accent);"></i> سجل درجاتك</h3>
-                        <table>
-                            <thead>
-                                <tr><th>المادة</th><th>الدرجة</th><th>الحالة</th><th>التاريخ</th></tr>
-                            </thead>
-                            <tbody id="student-grades-table">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="add-student-tab" class="tab-content" style="display:none;">
-                <div class="card">
-                    <h3>تسجيل طالب جديد في السحابة</h3>
-                    <input type="text" id="newSName" placeholder="اسم الطالب بالكامل">
-                    <input type="text" id="newSID" placeholder="الرقم التسلسلي (ID)">
-                    <button class="shimmer-btn" onclick="registerStudent()">حفظ البيانات</button>
-                </div>
-            </div>
-
-            <div id="add-grade-tab" class="tab-content" style="display:none;">
-                <div class="card">
-                    <h3>رصد درجة اختبار</h3>
-                    <input type="text" id="targetSID" placeholder="الرقم التسلسلي للطالب">
-                    <input type="text" id="subject" placeholder="المادة الدراسية">
-                    <input type="number" id="score" placeholder="الدرجة المستحقة">
-                    <button class="shimmer-btn" style="background:var(--success)" onclick="submitGrade()">رصد وإرسال</button>
-                </div>
-            </div>
-        </div>
+<div id="parent-tab" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3><i class="fas fa-user-shield"></i> متابعة الأبناء</h3>
+        <p>عرض سجل الغياب والدرجات الخاص بـ: <span id="childName">...</span></p>
     </div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script type="module">
+    // --- إضافة ميزات التقارير والحضور ---
+    import { doc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyDZSaUw0nBzvZUlXEhWOAqAMXEadcP0aUc",
-          authDomain: "manhal-lms.firebaseapp.com",
-          projectId: "manhal-lms",
-          storageBucket: "manhal-lms.firebasestorage.app",
-          messagingSenderId: "876046035090",
-          appId: "1:876046035090:web:39c65e507e462b88375e4b",
-          measurementId: "G-99TV6HV5QT"
-        };
+    // نظام النقاط (التلعيب)
+    window.awardPoints = async (studentDocId, points) => {
+        const studentRef = doc(db, "students", studentDocId);
+        await updateDoc(studentRef, {
+            points: increment(points)
+        });
+        alert("تمت إضافة النقاط بنجاح!");
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    // نظام الحضور والغياب (Attendance)
+    window.takeAttendance = async (studentId, status) => {
+        await addDoc(collection(db, "attendance"), {
+            sID: studentId,
+            status: status, // حاضراً، غائباً، متأخراً
+            date: new Date().toISOString().split('T')[0]
+        });
+    }
 
-        // --- نظام الدخول ---
-        window.toggleFields = () => {
-            const isAdm = document.getElementById('userRole').value === 'admin';
-            document.getElementById('loginPass').style.display = isAdm ? 'block' : 'none';
-        }
+    // الربط مع MS Teams و BigBlueButton
+    window.joinMeeting = (platform) => {
+        let url = platform === 'teams' ? "https://teams.microsoft.com/l/meetup-join/..." : "https://demo.bigbluebutton.org/gl/...";
+        window.open(url, '_blank');
+    };
 
-        window.handleLogin = async () => {
-            const role = document.getElementById('userRole').value;
-            const id = document.getElementById('loginID').value;
-            const pass = document.getElementById('loginPass').value;
-
-            if (role === 'admin') {
-                if (pass === "admin123") { startApp("المعلم المسؤول", true); }
-                else { alert("كلمة المرور غير صحيحة"); }
-            } else {
-                const q = query(collection(db, "students"), where("serial", "==", id));
-                const snap = await getDocs(q);
-                if (!snap.empty) {
-                    const studentData = snap.docs[0].data();
-                    startApp(studentData.name, false, id);
-                } else { alert("الرقم التسلسلي غير مسجل!"); }
-            }
-        }
-
-        function startApp(userName, isAdmin, serial = "") {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('main-system').style.display = 'flex';
-            document.getElementById('welcomeUser').innerText = "مرحباً، " + userName;
-            
-            if (isAdmin) {
-                document.getElementById('admin-tools').style.display = 'block';
-            } else {
-                document.getElementById('student-view').style.display = 'block';
-                fetchGrades(serial);
-            }
-        }
-
-        // --- نظام الدرجات (للمعلم) ---
-        window.submitGrade = async () => {
-            const sid = document.getElementById('targetSID').value;
-            const sub = document.getElementById('subject').value;
-            const scr = document.getElementById('score').value;
-
-            try {
-                await addDoc(collection(db, "grades"), {
-                    studentSerial: sid,
-                    subject: sub,
-                    score: Number(scr),
-                    date: new Date().toLocaleDateString('ar-AE')
-                });
-                alert("تم رصد الدرجة بنجاح!");
-            } catch (e) { alert("حدث خطأ في الاتصال"); }
-        }
-
-        // --- جلب النتائج (للطالب) ---
-        async function fetchGrades(serial) {
-            const q = query(collection(db, "grades"), where("studentSerial", "==", serial));
-            const snap = await getDocs(q);
-            const table = document.getElementById('student-grades-table');
-            table.innerHTML = "";
-            snap.forEach(doc => {
-                const g = doc.data();
-                const status = g.score >= 50 ? 'ناجح' : 'يحتاج تقوية';
-                table.innerHTML += `<tr>
-                    <td>${g.subject}</td>
-                    <td style="font-weight:bold; color:var(--success)">${g.score}</td>
-                    <td>${status}</td>
-                    <td>${g.date}</td>
-                </tr>`;
-            });
-        }
-
-        // --- تسجيل الطلاب الجدد ---
-        window.registerStudent = async () => {
-            const n = document.getElementById('newSName').value;
-            const s = document.getElementById('newSID').value;
-            await addDoc(collection(db, "students"), { name: n, serial: s });
-            alert("تم تسجيل الطالب في السحابة بنجاح!");
-        }
-
-        // --- التنقل بين التبويبات ---
-        window.showTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-            document.getElementById(tabId + '-tab').style.display = 'block';
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        }
-    </script>
-</body>
-</html>
+    // إرسال إشعارات البريد (Email API Simulation)
+    window.sendMailNotification = (toEmail, subject, body) => {
+        console.log(`إرسال إيميل إلى ${toEmail}: ${subject}`);
+        // هنا يمكن ربطها بـ EmailJS أو SendGrid لاحقاً
+    };
+</script>
