@@ -3,120 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة منهل LMS - الإصدار التعليمي الشامل</title>
+    <title>منصة منهل LMS | الإدارة السحابية</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --winji-blue: #2c3e50;
-            --winji-accent: #3498db;
-            --winji-success: #27ae60;
-            --shimmer-color: rgba(255, 255, 255, 0.2);
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --bg: #f4f7f6;
+            --white: #ffffff;
         }
 
-        body { font-family: 'Cairo', sans-serif; background: #f0f3f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-
-        /* الشيمر الاحترافي */
-        .shimmer-btn {
-            position: relative; overflow: hidden; background: var(--winji-accent);
-            color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer;
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
         }
-        .shimmer-btn::after {
-            content: ''; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, var(--shimmer-color), transparent);
-            transform: rotate(45deg); animation: shimmer 3s infinite;
+
+        /* تأثير الشيمر (Shimmer Effect) */
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
         }
-        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+        .btn-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 100% { left: 100%; } }
 
-        /* واجهة المستخدم (UI) */
-        .sidebar { width: 280px; background: var(--winji-blue); color: white; transition: 0.3s; }
-        .nav-link { padding: 18px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s; border-right: 4px solid transparent; }
-        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); border-right-color: var(--winji-accent); }
+        /* Sidebar القائمة الجانبية */
+        .sidebar {
+            width: 260px;
+            background: var(--primary);
+            color: white;
+            position: fixed;
+            height: 100%;
+            right: 0;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        }
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            border-right: 4px solid var(--accent);
+        }
 
-        .main-panel { flex: 1; overflow-y: auto; padding: 40px; }
-        .glass-card { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        /* Content المحتوى */
+        .main-content {
+            margin-right: 260px;
+            width: calc(100% - 260px);
+            padding: 40px;
+        }
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
 
-        /* نظام الجداول والصفوف */
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .data-table th { background: #f8f9fa; padding: 15px; border-bottom: 2px solid #ddd; }
-        .data-table td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div style="padding:40px 20px; text-align:center;">
-            <i class="fas fa-university fa-3x" style="color:var(--winji-accent)"></i>
-            <h2>مـنـهـل LMS</h2>
+        <div style="padding:30px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-graduation-cap fa-3x"></i>
+            <h2>منهل LMS</h2>
         </div>
-        <div class="nav-link active" onclick="switchTab('home')"><i class="fas fa-th-large"></i> لوحة التحكم</div>
-        <div class="nav-link" onclick="switchTab('students')"><i class="fas fa-user-graduate"></i> إدارة الطلاب</div>
-        <div class="nav-link" onclick="switchTab('classes')"><i class="fas fa-layer-group"></i> الصفوف والمسارات</div>
-        <div class="nav-link" onclick="switchTab('exams')"><i class="fas fa-pen-nib"></i> مركز الاختبارات</div>
-        <div class="nav-link" onclick="switchTab('settings')"><i class="fas fa-cogs"></i> إعدادات المدرسة</div>
+        <div class="nav-item active" onclick="showPage('dash')"><i class="fas fa-chart-line"></i> لوحة التحكم</div>
+        <div class="nav-item" onclick="showPage('students')"><i class="fas fa-user-plus"></i> إضافة طلاب</div>
+        <div class="nav-item" onclick="showPage('view')"><i class="fas fa-users"></i> عرض الطلاب</div>
     </div>
 
-    <div class="main-panel">
-        <div id="home-tab" class="tab-content">
-            <div class="glass-card">
-                <h1>أهلاً بك في نظام مـنـهـل الذكي</h1>
-                <p>إدارة شاملة للمدرسة بنقرة واحدة.</p>
-                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; margin-top:30px;">
-                    <div class="glass-card" style="border-top: 4px solid var(--winji-accent);">
-                        <h3>الطلاب النشطين</h3>
-                        <h2>450</h2>
-                    </div>
-                    <div class="glass-card" style="border-top: 4px solid var(--winji-success);">
-                        <h3>المعلمون</h3>
-                        <h2>32</h2>
-                    </div>
-                    <div class="glass-card" style="border-top: 4px solid orange;">
-                        <h3>الفصول المفتوحة</h3>
-                        <h2>12</h2>
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass-card">
-                <h3>🔍 البحث السريع عن طالب (بالاسم أو الرقم التسلسلي)</h3>
-                <input type="text" id="studentSearch" onkeyup="searchStudent()" placeholder="ادخل بيانات الطالب هنا..." style="width:100%; padding:15px; border-radius:10px; border:1px solid #ddd;">
-                <div id="searchResults" style="margin-top:20px;"></div>
+    <div class="main-content">
+        <div id="dash" class="page">
+            <div class="card">
+                <h1>أهلاً بك في نظام منهل السحابي</h1>
+                <p>النظام مرتبط الآن بقاعدة بيانات Google Cloud في قطر.</p>
             </div>
         </div>
 
-        <div id="classes-tab" class="tab-content" style="display:none;">
-            <div class="glass-card">
-                <h3>إضافة صف ومسار جديد</h3>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="className" placeholder="اسم الصف">
-                    <input type="text" id="section" placeholder="الشعبة">
-                    <select id="track">
-                        <option>عام</option>
-                        <option>متقدم</option>
-                        <option>نخبة</option>
-                    </select>
-                    <button class="shimmer-btn" onclick="addClass()">حفظ الصف</button>
-                </div>
+        <div id="students" class="page" style="display:none;">
+            <div class="card">
+                <h3>تسجيل طالب جديد في السحابة</h3>
+                <input type="text" id="sName" placeholder="اسم الطالب الكامل">
+                <input type="text" id="sID" placeholder="الرقم التسلسلي (ID)">
+                <button class="btn-shimmer" onclick="saveToFirebase()">حفظ في Firebase</button>
+            </div>
+        </div>
+
+        <div id="view" class="page" style="display:none;">
+            <div class="card">
+                <h3>قائمة الطلاب من السحابة</h3>
+                <div id="studentList">جاري تحميل البيانات...</div>
             </div>
         </div>
     </div>
 
-    <script>
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            document.getElementById(tab + '-tab').style.display = 'block';
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // منطق البحث والبيانات سيتم ربطه بـ Firebase في الخطوة التالية
-        function searchStudent() {
-            let query = document.getElementById('studentSearch').value;
-            // محاكاة نتائج
-            if(query.length > 2) {
-                document.getElementById('searchResults').innerHTML = `<div class="glass-card">نتائج البحث عن: ${query}</div>`;
+        // إعداداتك الخاصة التي زودتني بها
+        const firebaseConfig = {
+          apiKey: "AIzaSyDZSaUw0nBzvZUlXEhWOAqAMXEadcP0aUc",
+          authDomain: "manhal-lms.firebaseapp.com",
+          projectId: "manhal-lms",
+          storageBucket: "manhal-lms.firebasestorage.app",
+          messagingSenderId: "876046035090",
+          appId: "1:876046035090:web:39c65e507e462b88375e4b",
+          measurementId: "G-99TV6HV5QT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // وظيفة الحفظ في Firestore
+        window.saveToFirebase = async () => {
+            const name = document.getElementById('sName').value;
+            const serial = document.getElementById('sID').value;
+
+            if(!name || !serial) return alert("يرجى ملء كافة الحقول");
+
+            try {
+                await addDoc(collection(db, "students"), {
+                    name: name,
+                    serial: serial,
+                    createdAt: new Date()
+                });
+                alert("تم الحفظ بنجاح في سحابة قطر!");
+                document.getElementById('sName').value = "";
+                document.getElementById('sID').value = "";
+                loadStudents();
+            } catch (e) {
+                alert("خطأ: " + e.message);
             }
+        };
+
+        // وظيفة جلب البيانات
+        window.loadStudents = async () => {
+            const querySnapshot = await getDocs(collection(db, "students"));
+            const listDiv = document.getElementById('studentList');
+            listDiv.innerHTML = "";
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                listDiv.innerHTML += `<div class="card" style="margin:5px; border-right:4px solid var(--accent)">
+                    <strong>${data.name}</strong> - الرقم: ${data.serial}
+                </div>`;
+            });
+        };
+
+        window.showPage = (id) => {
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+            if(id === 'view') loadStudents();
         }
     </script>
 </body>
